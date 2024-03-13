@@ -1,0 +1,70 @@
+from collections import deque
+
+class PuzzleState:
+    def __init__(self, board, moves=0, previous=None):
+        self.board = board
+        self.moves = moves
+        self.previous = previous
+
+    def __eq__(self, other):
+        return self.board == other.board
+
+    def __hash__(self):
+        return hash(str(self.board))
+
+def get_possible_moves(state):
+    moves = []
+    empty_pos = state.board.index(0)
+    row, col = divmod(empty_pos, 3)
+
+    for dr, dc in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+        new_row, new_col = row + dr, col + dc
+        if 0 <= new_row < 3 and 0 <= new_col < 3:
+            new_pos = new_row * 3 + new_col
+            new_board = state.board[:]
+            new_board[empty_pos], new_board[new_pos] = new_board[new_pos], new_board[empty_pos]
+            moves.append(PuzzleState(new_board, state.moves + 1, state))
+    return moves
+
+def solve_puzzle(initial_board):
+    initial_state = PuzzleState(initial_board)
+    visited = set()
+    queue = deque([initial_state])
+
+    while queue:
+        current_state = queue.popleft()
+        visited.add(current_state)
+
+        if current_state.board == list(range(1, 9)) + [0]:
+            return current_state.moves, current_state
+
+        possible_moves = get_possible_moves(current_state)
+        for move in possible_moves:
+            if move not in visited:
+                queue.append(move)
+
+    return None
+
+def print_solution(solution):
+    if solution is None:
+        print("No solution found.")
+        return
+
+    moves, state = solution
+    path = []
+    while state:
+        path.append(state.board)
+        state = state.previous
+
+    for step in reversed(path):
+        print(step[0:3])
+        print(step[3:6])
+        print(step[6:9])
+        print()
+
+    print("Total moves:", moves)
+
+if __name__ == "__main__":
+    initial_board = [1, 2, 3, 4, 0, 5, 6, 7, 8]
+    solution = solve_puzzle(initial_board)
+    print_solution(solution)
