@@ -1,0 +1,64 @@
+from collections import deque
+
+class JugState:
+    def __init__(self, jug1, jug2):
+        self.jug1 = jug1
+        self.jug2 = jug2
+
+    def __eq__(self, other):
+        return self.jug1 == other.jug1 and self.jug2 == other.jug2
+
+    def __hash__(self):
+        return hash((self.jug1, self.jug2))
+
+    def __str__(self):
+        return f"({self.jug1}, {self.jug2})"
+
+def get_next_states(state):
+    next_states = []
+    # Fill jug1
+    next_states.append(JugState(4, state.jug2))
+    # Fill jug2
+    next_states.append(JugState(state.jug1, 3))
+    # Empty jug1
+    next_states.append(JugState(0, state.jug2))
+    # Empty jug2
+    next_states.append(JugState(state.jug1, 0))
+    # Pour jug1 into jug2 until jug2 is full or jug1 is empty
+    amount_to_pour = min(state.jug1, 3 - state.jug2)
+    next_states.append(JugState(state.jug1 - amount_to_pour, state.jug2 + amount_to_pour))
+    # Pour jug2 into jug1 until jug1 is full or jug2 is empty
+    amount_to_pour = min(state.jug2, 4 - state.jug1)
+    next_states.append(JugState(state.jug1 + amount_to_pour, state.jug2 - amount_to_pour))
+    return next_states
+
+def solve_water_jug():
+    start_state = JugState(0, 0)
+    visited = set()
+    queue = deque([(start_state, [])])
+
+    while queue:
+        current_state, path = queue.popleft()
+        if current_state.jug1 == 2 or current_state.jug2 == 2:
+            return path + [current_state]
+
+        visited.add(current_state)
+
+        for next_state in get_next_states(current_state):
+            if next_state not in visited:
+                queue.append((next_state, path + [current_state]))
+
+    return None
+
+def print_solution(solution):
+    if solution is None:
+        print("No solution found.")
+        return
+
+    print("Solution:")
+    for state in solution:
+        print(state)
+
+if __name__ == "__main__":
+    solution = solve_water_jug()
+    print_solution(solution)
