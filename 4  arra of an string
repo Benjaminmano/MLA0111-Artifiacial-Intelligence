@@ -1,0 +1,21 @@
+def encode_string(s, mapping):
+    return int(''.join(str(mapping[ch]) for ch in s))
+
+def can_map(arr, s):
+    # Get unique characters from arr and s
+    unique_chars = set(''.join(arr) + s)
+    if len(unique_chars) > 10:
+        return "No"  # There are more than 10 unique characters, not possible
+
+    for perm in permutations(range(10), len(unique_chars)):
+        mapping = dict(zip(unique_chars, perm))
+        if sum(encode_string(word, mapping) for word in arr) == encode_string(s, mapping):
+            return "Yes"
+    return "No"
+
+# Example usage:
+from itertools import permutations
+
+arr = ["SEND", "MORE"]
+s = "MONEY"
+print(can_map(arr, s))
